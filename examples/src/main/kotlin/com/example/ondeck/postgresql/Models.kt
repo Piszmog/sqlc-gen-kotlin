@@ -6,6 +6,16 @@ package com.example.ondeck.postgresql
 
 import java.time.LocalDateTime
 
+enum class Mood(val value: String) {
+  HAPPY("happy"),
+  SAD("sad");
+
+  companion object {
+    private val map = Mood.values().associateBy(Mood::value)
+    fun lookup(value: String?) = map[value]
+  }
+}
+
 // Venues can be either open or closed
 enum class Status(val value: String) {
   OPEN("op!en"),
@@ -13,13 +23,19 @@ enum class Status(val value: String) {
 
   companion object {
     private val map = Status.values().associateBy(Status::value)
-    fun lookup(value: String) = map[value]
+    fun lookup(value: String?) = map[value]
   }
 }
 
 data class City (
   val slug: String,
   val name: String
+)
+
+data class Person (
+  val id: Int,
+  val name: String,
+  val mood: Mood?
 )
 
 // Venues are places where muisc happens

@@ -7,19 +7,35 @@ package com.example.ondeck.mysql
 import java.sql.Timestamp
 import java.time.Instant
 
+enum class PeopleMood(val value: String) {
+  HAPPY("happy"),
+  SAD("sad");
+
+  companion object {
+    private val map = PeopleMood.values().associateBy(PeopleMood::value)
+    fun lookup(value: String?) = map[value]
+  }
+}
+
 enum class VenueStatus(val value: String) {
   OPEN("open"),
   CLOSED("closed");
 
   companion object {
     private val map = VenueStatus.values().associateBy(VenueStatus::value)
-    fun lookup(value: String) = map[value]
+    fun lookup(value: String?) = map[value]
   }
 }
 
 data class City (
   val slug: String,
   val name: String
+)
+
+data class Person (
+  val id: Long,
+  val name: String,
+  val mood: PeopleMood?
 )
 
 // Venues are places where muisc happens
