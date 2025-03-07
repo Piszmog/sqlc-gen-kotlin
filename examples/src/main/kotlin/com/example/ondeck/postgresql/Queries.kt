@@ -4,6 +4,7 @@
 
 package com.example.ondeck.postgresql
 
+import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Statement
@@ -13,6 +14,12 @@ import java.time.LocalDateTime
 interface Queries {
   @Throws(SQLException::class)
   fun createCity(name: String, slug: String): City?
+  
+  @Throws(SQLException::class)
+  fun createCounts(
+      slug: String,
+      count: BigDecimal,
+      increments: BigDecimal?): Count?
   
   @Throws(SQLException::class)
   fun createVenue(
@@ -35,6 +42,9 @@ interface Queries {
   
   @Throws(SQLException::class)
   fun listCities(): List<City>
+  
+  @Throws(SQLException::class)
+  fun listCounts(): List<Count>
   
   @Throws(SQLException::class)
   fun listVenues(city: String): List<Venue>

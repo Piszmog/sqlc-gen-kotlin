@@ -4,6 +4,7 @@
 
 package com.example.ondeck.postgresql
 
+import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Statement
@@ -18,6 +19,18 @@ INSERT INTO city (
     ?,
     ?
 ) RETURNING slug, name
+"""
+
+const val createCounts = """-- name: createCounts :one
+INSERT INTO counts (
+    slug,
+    count,
+    increments
+) VALUES (
+?,
+?,
+?
+) RETURNING slug, count, increments
 """
 
 const val createVenue = """-- name: createVenue :one
@@ -63,6 +76,11 @@ const val listCities = """-- name: listCities :many
 SELECT slug, name
 FROM city
 ORDER BY name
+"""
+
+const val listCounts = """-- name: listCounts :many
+SELECT slug, count, increments
+FROM counts
 """
 
 const val listVenues = """-- name: listVenues :many
@@ -118,6 +136,32 @@ class QueriesImpl(private val conn: Connection) : Queries {
       val ret = City(
                 results.getString(1),
                 results.getString(2)
+            )
+      if (results.next()) {
+          throw SQLException("expected one row in result set, but got many")
+      }
+      ret
+    }
+  }
+
+  @Throws(SQLException::class)
+  override fun createCounts(
+      slug: String,
+      count: BigDecimal,
+      increments: BigDecimal?): Count? {
+    return conn.prepareStatement(createCounts).use { stmt ->
+      stmt.setString(1, slug)
+          stmt.setBigDecimal(2, count)
+          stmt.setBigDecimal(3, increments)
+
+      val results = stmt.executeQuery()
+      if (!results.next()) {
+        return null
+      }
+      val ret = Count(
+                results.getString(1),
+                results.getBigDecimal(2),
+                results.getBigDecimal(3)
             )
       if (results.next()) {
           throw SQLException("expected one row in result set, but got many")
@@ -225,6 +269,23 @@ class QueriesImpl(private val conn: Connection) : Queries {
           ret.add(City(
                 results.getString(1),
                 results.getString(2)
+            ))
+      }
+      ret
+    }
+  }
+
+  @Throws(SQLException::class)
+  override fun listCounts(): List<Count> {
+    return conn.prepareStatement(listCounts).use { stmt ->
+      
+      val results = stmt.executeQuery()
+      val ret = mutableListOf<Count>()
+      while (results.next()) {
+          ret.add(Count(
+                results.getString(1),
+                results.getBigDecimal(2),
+                results.getBigDecimal(3)
             ))
       }
       ret
