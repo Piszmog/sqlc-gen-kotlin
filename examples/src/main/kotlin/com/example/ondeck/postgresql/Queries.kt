@@ -12,6 +12,9 @@ import java.time.LocalDateTime
 
 interface Queries {
   @Throws(SQLException::class)
+  fun createCheckingAccount(depositAmount: Int?, depositRate: Double?): CheckingAccount?
+  
+  @Throws(SQLException::class)
   fun createCity(name: String, slug: String): City?
   
   @Throws(SQLException::class)
