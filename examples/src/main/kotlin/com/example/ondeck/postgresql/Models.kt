@@ -4,6 +4,7 @@
 
 package com.example.ondeck.postgresql
 
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 // Venues can be either open or closed
@@ -20,6 +21,12 @@ enum class Status(val value: String) {
 data class City (
   val slug: String,
   val name: String
+)
+
+data class Count (
+  val slug: String,
+  val count: BigDecimal,
+  val increments: BigDecimal?
 )
 
 // Venues are places where muisc happens
