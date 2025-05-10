@@ -15,6 +15,9 @@ interface Queries {
   fun createCity(name: String, slug: String): City?
   
   @Throws(SQLException::class)
+  fun createPerson(name: String, mood: Mood?): Int?
+  
+  @Throws(SQLException::class)
   fun createVenue(
       slug: String,
       name: String,
@@ -35,6 +38,9 @@ interface Queries {
   
   @Throws(SQLException::class)
   fun listCities(): List<City>
+  
+  @Throws(SQLException::class)
+  fun listPeople(): List<Person>
   
   @Throws(SQLException::class)
   fun listVenues(city: String): List<Venue>

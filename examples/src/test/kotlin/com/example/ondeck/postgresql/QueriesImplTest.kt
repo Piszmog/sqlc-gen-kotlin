@@ -2,6 +2,7 @@ package com.example.ondeck.postgresql
 
 import com.example.dbtest.PostgresDbTestExtension
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -42,5 +43,14 @@ class QueriesImplTest {
         assertEquals(venue.id, id)
 
         q.deleteVenue(venue.slug)
+
+        val person1Id = q.createPerson("Jane", null)
+        val person2Id = q.createPerson("John", Mood.HAPPY)
+        val people = q.listPeople()
+        assertEquals(2, people.size)
+        val person1 = people.first { it.id == person1Id }
+        val person2 = people.first { it.id == person2Id }
+        assertNull(person1.mood)
+        assertEquals(Mood.HAPPY, person2.mood)
     }
 }

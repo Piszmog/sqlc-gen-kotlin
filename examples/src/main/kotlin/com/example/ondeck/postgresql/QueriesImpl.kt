@@ -20,6 +20,16 @@ INSERT INTO city (
 ) RETURNING slug, name
 """
 
+const val createPerson = """-- name: createPerson :one
+INSERT INTO people (
+    name,
+    mood
+) VALUES (
+    ?,
+    ?
+) RETURNING id
+"""
+
 const val createVenue = """-- name: createVenue :one
 INSERT INTO venue (
     slug,
@@ -63,6 +73,11 @@ const val listCities = """-- name: listCities :many
 SELECT slug, name
 FROM city
 ORDER BY name
+"""
+
+const val listPeople = """-- name: listPeople :many
+SELECT id, name, mood
+FROM people
 """
 
 const val listVenues = """-- name: listVenues :many
@@ -119,6 +134,24 @@ class QueriesImpl(private val conn: Connection) : Queries {
                 results.getString(1),
                 results.getString(2)
             )
+      if (results.next()) {
+          throw SQLException("expected one row in result set, but got many")
+      }
+      ret
+    }
+  }
+
+  @Throws(SQLException::class)
+  override fun createPerson(name: String, mood: Mood?): Int? {
+    return conn.prepareStatement(createPerson).use { stmt ->
+      stmt.setString(1, name)
+          stmt.setObject(2, mood?.value, Types.OTHER)
+
+      val results = stmt.executeQuery()
+      if (!results.next()) {
+        return null
+      }
+      val ret = results.getInt(1)
       if (results.next()) {
           throw SQLException("expected one row in result set, but got many")
       }
@@ -225,6 +258,23 @@ class QueriesImpl(private val conn: Connection) : Queries {
           ret.add(City(
                 results.getString(1),
                 results.getString(2)
+            ))
+      }
+      ret
+    }
+  }
+
+  @Throws(SQLException::class)
+  override fun listPeople(): List<Person> {
+    return conn.prepareStatement(listPeople).use { stmt ->
+      
+      val results = stmt.executeQuery()
+      val ret = mutableListOf<Person>()
+      while (results.next()) {
+          ret.add(Person(
+                results.getInt(1),
+                results.getString(2),
+                Mood.lookup(results.getString(3))
             ))
       }
       ret

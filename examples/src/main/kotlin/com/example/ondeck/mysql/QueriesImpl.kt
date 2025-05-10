@@ -20,6 +20,16 @@ INSERT INTO city (
 )
 """
 
+const val createPerson = """-- name: createPerson :exec
+INSERT INTO people (
+    name,
+    mood
+) VALUES (
+    ?,
+    ?
+)
+"""
+
 const val createVenue = """-- name: createVenue :execresult
 INSERT INTO venue (
     slug,
@@ -65,6 +75,11 @@ FROM city
 ORDER BY name
 """
 
+const val listPeople = """-- name: listPeople :many
+SELECT id, name, mood
+FROM people
+"""
+
 const val listVenues = """-- name: listVenues :many
 SELECT id, status, statuses, slug, name, city, spotify_playlist, songkick_id, tags, created_at
 FROM venue
@@ -105,6 +120,16 @@ class QueriesImpl(private val conn: Connection) : Queries {
     conn.prepareStatement(createCity).use { stmt ->
       stmt.setString(1, name)
           stmt.setString(2, slug)
+
+      stmt.execute()
+    }
+  }
+
+  @Throws(SQLException::class)
+  override fun createPerson(name: String, mood: PeopleMood?) {
+    conn.prepareStatement(createPerson).use { stmt ->
+      stmt.setString(1, name)
+          stmt.setString(2, mood?.value)
 
       stmt.execute()
     }
@@ -207,6 +232,23 @@ class QueriesImpl(private val conn: Connection) : Queries {
           ret.add(City(
                 results.getString(1),
                 results.getString(2)
+            ))
+      }
+      ret
+    }
+  }
+
+  @Throws(SQLException::class)
+  override fun listPeople(): List<Person> {
+    return conn.prepareStatement(listPeople).use { stmt ->
+      
+      val results = stmt.executeQuery()
+      val ret = mutableListOf<Person>()
+      while (results.next()) {
+          ret.add(Person(
+                results.getLong(1),
+                results.getString(2),
+                PeopleMood.lookup(results.getString(3))
             ))
       }
       ret

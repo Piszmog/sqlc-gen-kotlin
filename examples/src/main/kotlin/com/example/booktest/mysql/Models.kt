@@ -12,7 +12,7 @@ enum class BooksBookType(val value: String) {
 
   companion object {
     private val map = BooksBookType.values().associateBy(BooksBookType::value)
-    fun lookup(value: String) = map[value]
+    fun lookup(value: String?) = map[value]
   }
 }
 
