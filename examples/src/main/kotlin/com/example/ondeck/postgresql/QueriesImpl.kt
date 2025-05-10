@@ -10,6 +10,11 @@ import java.sql.Statement
 import java.sql.Types
 import java.time.LocalDateTime
 
+const val createCheckingAccount = """-- name: createCheckingAccount :one
+INSERT INTO checking_accounts (deposit_amount, deposit_rate)
+VALUES (?, ?) RETURNING id, deposit_amount, deposit_rate
+"""
+
 const val createCity = """-- name: createCity :one
 INSERT INTO city (
     name,
@@ -100,6 +105,28 @@ data class VenueCountByCityRow (
 )
 
 class QueriesImpl(private val conn: Connection) : Queries {
+
+  @Throws(SQLException::class)
+  override fun createCheckingAccount(depositAmount: Int?, depositRate: Double?): CheckingAccount? {
+    return conn.prepareStatement(createCheckingAccount).use { stmt ->
+      if (depositAmount != null) stmt.setInt(1, depositAmount) else stmt.setNull(1, Types.INTEGER)
+          if (depositRate != null) stmt.setDouble(2, depositRate) else stmt.setNull(2, Types.DOUBLE)
+
+      val results = stmt.executeQuery()
+      if (!results.next()) {
+        return null
+      }
+      val ret = CheckingAccount(
+                results.getInt(1),
+                results.getInt(2),
+                results.getDouble(3)
+            )
+      if (results.next()) {
+          throw SQLException("expected one row in result set, but got many")
+      }
+      ret
+    }
+  }
 
 // Create a new city. The slug must be unique.
 // This is the second line of the comment

@@ -17,6 +17,12 @@ enum class Status(val value: String) {
   }
 }
 
+data class CheckingAccount (
+  val id: Int,
+  val depositAmount: Int?,
+  val depositRate: Double?
+)
+
 data class City (
   val slug: String,
   val name: String
